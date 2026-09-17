@@ -1,1 +1,2 @@
-set prompt="%{\033[1;32m%}%n%{\033[0m@}%m %{\033[1;34m%}%~%{\033[0m%}# "
+backup_program  "Restic"
+                rsync,
