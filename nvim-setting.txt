@@ -4,7 +4,10 @@ backup_program  "Restic"   rsync,
 1. git clone https://github.com/NvChad/starter ~/.config/nvim && nvim
 2. :MasonInstallAll and :TSInstallAll
 3. Delete the .git folder from nvim folder.
-4. Lazy sync command
+4. :Lazy sync
+
+
+
 
 
 Uninstall
