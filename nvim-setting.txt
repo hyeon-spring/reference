@@ -60,13 +60,35 @@ backup_program  "Restic"   rsync,
     require("dapui").setup()
   end
 },
-8.
+
+{
+  'rust-lang/rust.vim',
+  ft = "rust",
+  unit = function()
+    vim.g.rustfmt_autosave = 1
+  end
+},
+
+{
+  'saecki/crates.nvim',
+  ft = {"toml"},
+  config = function()
+    require("crates").setup {
+      completion = {
+        cmp = {
+          enabled = true
+        },
+      },
+    }
+    require('cmp').setup.buffer({
+      sources = { { name = "crates" }}
+    })
+  end
+},
 
 
 
-
-
-9. configs ->mappings.lua   (space-mainkey dt)
+8. configs ->mappings.lua   (space-mainkey dt)
 -- Nvim DAP
 map("n","<Leader>dl","<cmd>lua require'dap'.step_into()<CR>",{desc="Debugger step into"})
 map("n","<Leader>dj","<cmd>lua require'dap'.step_over()<CR>",{desc="Debugger step over"})
