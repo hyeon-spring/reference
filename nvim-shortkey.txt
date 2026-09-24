@@ -1,1 +1,5 @@
-mkey
+Ctrl + n        file-tree 
+Leader + TH     theme
+Leader + FF     file find
+Leader + H      run terminal
+  'exit',enter  end terminal
