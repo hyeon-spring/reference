@@ -1,0 +1,56 @@
+//Arch Linux 및 그 계열(Manjaro, EndeavourOS 등) 배포판에서 시스템 전체를 최신 상태로
+//업데이트하는 동시에,
+//AUR(Arch User Repository) 패키지 빌드 및 소스 코드 관리에 필수적인 도구들을 설치
+//sudo pacman -Syu base-devel git
+sudo pacman -S base-devel cmake ninja (neovim) clang
+sudo pacman -S opencl-headers opencl-clhpp
+yay -S android-ndk android-sdk
+sudo pacman -Syu unzip (jdk-openjdk nodejs)
+
+//bash 환경 변수 설정 (~/.bashrc 또는 ~/.zshrc):
+export ANDROID_HOME=/opt/android-sdk
+export ANDROID_NDK_HOME=/opt/android-ndk
+export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
+
+//c++
+sudo pacman -Syu base-devel clang cmake git unzip xclip
+
+init.lua 내부 또는 플러그인 분할 파일(lua/plugins/mason.lua) 예시:
+return {
+  "neovim/nvim-lspconfig",
+  dependencies = {
+    "williamboman/mason.nvim",
+    "williamboman/mason-lspconfig.nvim",
+  },
+  config = function()
+    require("mason").setup()
+    require("mason-lspconfig").setup({
+      ensure_installed = { "clangd" }
+    })
+
+    local lspconfig = require("lspconfig")
+    
+    lspconfig.clangd.setup({
+      cmd = {
+        "clangd",
+        "--background-index",
+        "--clang-tidy",
+        -- OpenCL C++ 관련 확장자 및 표준 지원 추가
+        "--fallback-style=LLVM",
+        "-x", "cl", -- 필요 시 OpenCL C 코드를 파일별로 강제 지정할 수도 있음
+
+
+    '--alloc-engine=stderr',
+    '--header-insertion=iwyu',
+    '--completion-style=detailed',
+    '--function-arg-placeholders',
+      },
+      root_dir = lspconfig.util.root_pattern(
+        "compile_commands.json",
+        "compile_flags.txt",
+        ".git"
+      ),
+    })
+  end
+}
+  
