@@ -1,7 +1,9 @@
 backup_program  "Restic"   rsync,
 
 0. curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-1. git clone https://github.com/NvChad/starter ~/.config/nvim && nvim
+1. git clone https://github.com/NvChad/starter ~/.config/nvim && nvim       <- NcChad
+
+
 2. :MasonInstallAll and :TSInstallAll
 3. Delete the .git folder from nvim folder.
 4. :Lazy sync
