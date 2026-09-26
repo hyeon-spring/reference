@@ -1,0 +1,159 @@
+# Arch Linux에서 Neovim + C++로 안드로이드 게임 개발 환경 구축 가이드
+
+## 1. 필수 프로그램 및 패키지 설치
+
+### (1) 기본 C/C++ 빌드 도구 및 Neovim
+```bash
+sudo pacman -Syu
+sudo pacman -S base-devel git cmake ninja clang lldb neovim ripgrep fd wl-clipboard
+# X11 사용 시 wl-clipboard 대신 xclip 설치
+```
+
+### (2) Java (JDK 17)
+Android Gradle 빌드 도구와 호환성을 위해 JDK 17을 권장합니다.
+```bash
+sudo pacman -S jdk17-openjdk
+# 시스템 기본 자바 버전으로 설정
+sudo archlinux-java set java-17-openjdk
+```
+
+### (3) Android Command-line Tools 및 NDK 설정
+
+1. **디렉터리 생성 및 Command-line Tools 다운로드**
+```bash
+mkdir -p ~/Android/Sdk/cmdline-tools
+cd ~/Android/Sdk/cmdline-tools
+wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+unzip cmdline-tools.zip
+mv cmdline-tools latest
+rm cmdline-tools.zip
+```
+
+2. **환경 변수 설정 (`~/.bashrc` 또는 `~/.zshrc`)**
+```bash
+export ANDROID_HOME=$HOME/Android/Sdk
+export ANDROID_SDK_ROOT=$ANDROID_HOME
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/emulator
+```
+설정 후 `source ~/.bashrc` (또는 `source ~/.zshrc`)를 실행합니다.
+
+3. **SDK 패키지 및 NDK 설치**
+```bash
+# 라이선스 동의
+yes | sdkmanager --licenses
+
+# 플랫폼 툴(adb), 빌드 툴, 타겟 플랫폼, NDK, CMake 설치
+sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125" "cmake;3.22.1"
+```
+
+4. **NDK 환경 변수 추가 (`~/.bashrc` 또는 `~/.zshrc`)**
+```bash
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.1.10909125
+export PATH=$PATH:$ANDROID_NDK_HOME
+```
+
+---
+
+## 2. Neovim 설정 (C++ / NDK clangd 연동)
+
+Neovim에서 C++ NDK 개발 시 `clangd`가 `compile_commands.json`을 통해 안드로이드 NDK 헤더와 컴파일 플래그를 인식하도록 설정합니다.
+
+### 주요 권장 플러그인 (lazy.nvim 기준)
+- **LSP / 자동완성**: `nvim-lspconfig`, `mason.nvim`, `mason-lspconfig.nvim`, `nvim-cmp`, `cmp-nvim-lsp`
+- **문법 분석**: `nvim-treesitter`
+- **파일 탐색**: `telescope.nvim`, `neo-tree.nvim`
+- **터미널**: `toggleterm.nvim`
+
+### Neovim LSP 설정 예시 (`~/.config/nvim/init.lua` 등)
+```lua
+require("mason").setup()
+require("mason-lspconfig").setup({
+    ensure_installed = { "clangd" },
+})
+
+local lspconfig = require("lspconfig")
+lspconfig.clangd.setup({
+    cmd = {
+        "clangd",
+        "--background-index",
+        "--clang-tidy",
+        "--compile-commands-dir=.",
+        "--header-insertion=iwyu",
+        "--completion-style=detailed",
+    },
+    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+})
+```
+
+---
+
+## 3. C++ 안드로이드 프로젝트 구조 및 빌드 설정
+
+### 프로젝트 기본 디렉터리 구조
+```text
+my-game/
+├── app/
+│   ├── build.gradle
+│   ├── src/main/
+│   │   ├── AndroidManifest.xml
+│   │   ├── cpp/
+│   │   │   ├── CMakeLists.txt
+│   │   │   └── main.cpp
+│   │   └── assets/
+├── gradlew
+├── settings.gradle
+└── compile_commands.json -> (빌드 후 생성되는 compile_commands.json 심볼릭 링크)
+```
+
+### CMakeLists.txt 예시 (`app/src/main/cpp/CMakeLists.txt`)
+```cmake
+cmake_minimum_required(VERSION 3.22.1)
+project("my_game")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_library(${CMAKE_PROJECT_NAME} SHARED
+    main.cpp
+)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    android
+    log
+    EGL
+    GLESv3
+)
+```
+
+---
+
+## 4. Neovim에서 NDK 자동완성(clangd) 완벽 연동 팁
+
+1. **Gradle 빌드 1회 실행**:
+   ```bash
+   ./gradlew assembleDebug
+   ```
+2. **`compile_commands.json` 심볼릭 링크 생성**:
+   Gradle 빌드 시 생성된 `compile_commands.json`을 프로젝트 루트로 연결합니다.
+   ```bash
+   ln -sf app/.cxx/Debug/*/arm64-v8a/compile_commands.json ./compile_commands.json
+   ```
+3. 이제 Neovim에서 `app/src/main/cpp/main.cpp`를 열면 `clangd`가 `android/native_activity.h`, `android/log.h`, GLES3 헤더를 완벽하게 인식합니다.
+
+---
+
+## 5. 실행 및 디버깅 명령어 워크플로우
+
+- **연결된 기기 확인**:
+  ```bash
+  adb devices
+  ```
+- **빌드 후 디바이스 설치 및 실행**:
+  ```bash
+  ./gradlew installDebug && adb shell am start -n com.example.mygame/android.app.NativeActivity
+  ```
+- **실시간 네이티브 로그 확인**:
+  ```bash
+  adb logcat -s MyGameTag:V DEBUG:E
+  ```
