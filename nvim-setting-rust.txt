@@ -8,7 +8,7 @@ backup_program  "Restic"   rsync,
 3. Delete the .git folder from nvim folder.
 4. :Lazy sync
 5. :MasonInstall rust-analyzer
-6. :MasonInstall codelldb
+6. :MasonInstall codelldb   <--error 이면 unzip 설치
 7.()Ctrl+n)lua -> plugins->init.lua
 {
   'mrcjkb/rustaceanvim',
