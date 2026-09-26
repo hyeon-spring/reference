@@ -44,15 +44,87 @@ my-opencl-project/
                         └── opencl/
                             └── Main.kt
 
+🔹 C++ + OpenCL 설정\
+    C++에서 OpenCL을 사용할 때는 CMake를 사용하는 것이 가장 표준적이고 편리합니다.
+    CMakeLists.txt 작성 예시:
+        cmakecmake_minimum_required(VERSION 3.10)
+        project(OpenCL_CPP_Project OpenProject CXX)
+        set(CMAKE_CXX_STANDARD 17)
+        # OpenCL 패키지 찾기
+        find_package(OpenCL REQUIRED)
+        add_executable(main main.cpp)
+        # 헤더 및 라이브러리 링크
+        target_include_directories(main PRIVATE ${OpenCL_INCLUDE_DIRS})
+        target_link_libraries(main PRIVATE ${OpenCL_LIBRARIES})
 
+main.cpp 예시 코드:
+cpp
+#define CL_HPP_TARGET_OPENCL_VERSION 200
+#include <CL/opencl.hpp>
+#include <iostream>
+int main() {
+    std::vector<cl::Platform> platforms;
+    cl::Platform::get(&platforms);
+    if (platforms.empty()) {
+        std::cerr << "OpenCL 플랫폼을 찾을 수 없습니다.\n";
+        return 1;
+    }
+    std::cout << "사용 가능한 플랫폼: " << platforms[0].getInfo<CL_PLATFORM_NAME>() << "\n";
+    return 0;
+}
 
+🔹 Kotlin + OpenCL 설정Kotlin(JVM 환경)에서 OpenCL 하드웨어 가속을 쓰려면 LWJGL(Lightweight Java Game Library) 또는 JavaCL 같은 바인딩 라이브러리를 사용해야 합니다. 최신 환경에서는 LWJGL의 OpenCL 바인딩을 추천합니다. Gradle을 통해 프로젝트를 관리하는 것이 좋습니다.
+build.gradle.kts 설정 예시:
+kotlin
+plugins {
+    kotlin("jvm") version "1.9.20"
+    application
+}
+repositories {
+    mavenCentral()
+}
+dependencies {
+    // LWJGL 코어 및 OpenCL 바인딩 추가
+    implementation("org.lwjgl:lwjgl:3.3.3")
+    implementation("org.lwjgl:lwjgl-opencl:3.3.3")
 
+    // 현재 운영체제(Linux)용 네이티브 바이너리 추가
+    runtimeOnly("org.lwjgl:lwjgl::natives-linux")
+}
+application {
+    mainClass.set("MainKt")
+}
 
+src/main/kotlin/Main.kt 예시 코드:
+kotlin
+import org.lwjgl.opencl.CL
+import org.lwjgl.opencl.CL10.*
+import org.lwjgl.PointerBuffer
+import org.lwjgl.system.MemoryStack
 
+fun main() {
+    // OpenCL 환경 초기화
+    CL.create()
 
+    MemoryStack.stackPush().use { stack ->
+        val pi = stack.mallocPointer(1)
+        clGetPlatformIDs(null, pi)
+        val numPlatforms = pi.get(0).toInt()
+        println("찾은 OpenCL 플랫폼 수: $numPlatforms")
+    }
 
+    CL.destroy()
+}
 
-
+4. 전체적인 워크플로우 팁
+*Neovim 안에서 터미널 열기: 코드 작성 중 :terminal을 입력하거나 toggleterm.nvim 같은 플러그인을 쓰면, 
+Neovim을 나가지 않고 cmake .. && make 또는 ./gradlew run 명령어로 즉시 빌드 및 테스트를 할 수 있어 생산성이 크게 올라갑니다.
+*C++ 컴파일 에러 방지: C++ LSP(clangd)가 OpenCL 헤더 위치를 잘 찾지 못해 Neovim에 빨간 줄이 뜬다면,
+빌드 디렉토리에서 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .. 명령을 실행해
+compile_commands.json 파일을 프로젝트 루트로 복사해 주면 완벽하게 인식합니다.
+디렉토리 구조 상세 설명kernels/: C++과 Kotlin 양쪽에서 공통으로 로드해서 사용할 수 있는 OpenCL 커널 파일(.cl)들을 모아두는 독립 폴더입니다.
+런타임에 이 경로의 파일을 읽어와 빌드합니다.cpp-host/: C++과 CMake를 이용해 OpenCL API를 직접 호출하는 고성능 호스트 코드 폴더입니다. CMakeLists.txt를 통해 OpenCL 패키지를 링크합니다.kotlin-host/: Gradle과 LWJGL 라이브러리를 사용하여 JVM 위에서 OpenCL을 제어하는
+Kotlin 소스 코드 폴더입니다.
 
 
 
