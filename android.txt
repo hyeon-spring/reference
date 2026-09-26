@@ -1,3 +1,104 @@
+1.기본 빌드 도구 및 Neovim, Kotlin 설치
+sudo pacman -Syu base-devel cmake neovim kotlin gradle neon ninja
+2. 공통 라이브러리 및 헤더:
+sudo pacman -S ocl-icd opencl-headers
+3.GPU 런타임 설치:
+sudo pacman -S nvidia-utils (OpenCL 라이브러리가 포함되어 있습니다)
+
+Neovim 개발 환경 설정 (LSP 및 자동완성)
+C++ LSP: clangd
+Kotlin LSP: kotlin-language-server
+
+sudo pacman -S clang
+
+init.lua 필수 설정 예시 (LSP 빌드업)
+-- nvim-lspconfig 설정 예시
+local lspconfig = require('lspconfig')
+-- C++ 설정
+lspconfig.clangd.setup{}
+-- Kotlin 설정
+lspconfig.kotlin_language_server.setup{}
+
+Kotlin에서 C++ 코드를 호출하기 위해 CMake와 Gradle을 함께 사용하는 구조
+//프로젝트 디렉토리 구조
+my-opencl-project/
+├── .gitignore
+├── README.md
+├── kernels/                    # OpenCL 커널 소스 코드 (.cl 파일)
+│   ├── vector_add.cl
+│   └── compute.cl
+├── cpp-host/                   # C++ 기반 OpenCL 호스트 애플리케이션
+│   ├── CMakeLists.txt
+│   ├── include/
+│   │   └── cl_util.hpp
+│   └── src/
+│       └── main.cpp
+└── kotlin-host/                # Kotlin(JVM) 기반 OpenCL 호스트 애플리케이션
+    ├── build.gradle.kts
+    ├── settings.gradle.kts
+    └── src/
+        └── main/
+            └── kotlin/
+                └── com/
+                    └── example/
+                        └── opencl/
+                            └── Main.kt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //Arch Linux 및 그 계열(Manjaro, EndeavourOS 등) 배포판에서 시스템 전체를 최신 상태로
 //업데이트하는 동시에,
 //AUR(Arch User Repository) 패키지 빌드 및 소스 코드 관리에 필수적인 도구들을 설치
