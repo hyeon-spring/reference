@@ -3,7 +3,7 @@ Leader + TH     theme
 Leader + FF     file find
 
 Leader + H      run terminal
-  'exit',enter  end terminal
+  'exit',enter  end terlspminal
 
 Ctrl + (w) + h: 왼쪽 창으로 이동
  Ctrl + (w) + w: 순서대로 돌아가면서 다음 창으로 이동
@@ -15,6 +15,16 @@ s: 현재 커서 위치의 글자를 지우고 즉시 입력(Insert) 모드
 dw: 커서 위치부터 한 단어(word)를 삭제합니다.
 de: 커서 위치부터 단어의 끝까지 삭제합니다.d$/D: 커서 위치부터 해당 줄의 끝까지 삭제합니다.
 d^: 커서 위치부터 해당 줄의 맨 처음(공백 제외)까지 삭제합니다
+
+기능	기본 단축키	대체 키
+한 화면 위로 (Page Up)	Ctrl + b (backward)	Page Up
+한 화면 아래로 (Page Down)	Ctrl + f (forward)	Page Down
+반 화면 위로 (Half Page Up)	Ctrl + u (up)	-
+반 화면 아래로 (Half Page Down)	Ctrl + d (down)	-
+
+
+
+
 
 
 
