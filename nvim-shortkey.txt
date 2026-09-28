@@ -1,5 +1,42 @@
 Ctrl + n        file-tree 
 Leader + TH     theme
 Leader + FF     file find
+
 Leader + H      run terminal
   'exit',enter  end terminal
+
+Ctrl + (w) + h: 왼쪽 창으로 이동
+ Ctrl + (w) + w: 순서대로 돌아가면서 다음 창으로 이동
+
+x :커서 위치의 텍스트를 지우는 가장 빠른 방법
+s: 현재 커서 위치의 글자를 지우고 즉시 입력(Insert) 모드
+
+단어 또는 구간 지우기
+dw: 커서 위치부터 한 단어(word)를 삭제합니다.
+de: 커서 위치부터 단어의 끝까지 삭제합니다.d$/D: 커서 위치부터 해당 줄의 끝까지 삭제합니다.
+d^: 커서 위치부터 해당 줄의 맨 처음(공백 제외)까지 삭제합니다
+
+
+
+-- 712 84 43 (Lua 7I8hH
+
+vim.opt.number = true -- 2ol Wz HA|
+vim.opt.relativenumber = true -- A 2tQl WS EA| (0|5 H2|)
+vim.opt.shiftwidth = 4 -- E0{MY| 47t
+vim.opt.tabstop = 4 -- ® 44| 4zt
+vim.opt.expandtab = true -- g 3uo=z g
+vim.opt.smartindent = true -- ADIE E0M7|
+vim.opt.termguicolors = true -- 24H|E RGB Z23| &A%t
+
+-- 2|H7|(Leader Key) M
+
+vim.g.mapleader = " " -- AH0|AHIE 2|H7|Z2 X|H
+
+-- sy oh=7| ofe
+
+local keymap = vim.keymap.set
+
+keymap("n", "<leader>pv", vim.cmd.Ex, { desc = "It EM47| HJ|" })
+keymap("n", "<C-h>", "<C-w>h", { desc = "&I% &O= 0|5" })
+
+keymap("n", "<C-1>", "<C-w>1", { desc = "QEZ% XHO= 0|5" })
