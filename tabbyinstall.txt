@@ -1,0 +1,62 @@
+Arch Linux에서 Vulkan 백엔드가 포함된 **Tabby (TabbyML) 바이너리를 설치하는 방법**은 두 가지가 있습니다. Arch Linux 전용 사용자 저장소(**AUR**) 패키지를 이용하는 것이 가장 간편하며, 필요에 따라 **공식 바이너리**를 직접 다운로드하여 구성할 수도 있습니다.
+
+---
+
+### 방법 1: AUR을 통해 편리하게 설치하기 (추천)
+Arch Linux에는 Vulkan 지원 prebuilt 바이너리인 `tabbyml-vulkan-bin` 패키지가 등록되어 있습니다. AUR 도우미(예: `yay` 또는 `paru`)를 사용하면 원클릭으로 의존성까지 자동 설치됩니다.
+
+**1. Vulkan 관련 드라이버 및 패키지 설치**
+먼저 시스템에 맞는 Vulkan 드라이버가 구비되어 있는지 확인해야 합니다. GPU 제조사에 맞는 패키지를 설치하세요.
+```bash
+# 기본 Vulkan 로더 설치
+sudo pacman -S vulkan-icd-loader
+
+# 사용 중인 GPU에 맞게 선택 설치
+sudo pacman -S vulkan-radeon   # AMD 그래픽 카드용
+sudo pacman -S nvidia-utils    # NVIDIA 그래픽 카드용
+sudo pacman -S vulkan-intel    # Intel 내장 그래픽용
+```
+
+**2. AUR 도우미로 Tabby Vulkan 설치**
+```bash
+# yay 사용 시
+yay -S tabbyml-vulkan-bin
+
+# paru 사용 시
+paru -S tabbyml-vulkan-bin
+```
+*(패키지 설치가 완료되면 시스템 바이너리 경로에 자동으로 `tabby` 실행 파일이 등록됩니다.)*
+
+---
+
+### 방법 2: GitHub 수동 다운로드 및 설치
+AUR 도우미를 쓰지 않고 Tabby GitHub Releases에서 직접 바이너리를 내려받아 설치하는 방법입니다.
+
+**1. 바이너리 다운로드 및 압축 해제**
+Tabby Releases에서 `vulkan` 단어가 들어간 Linux 압축 파일(`tabby_x86_64-manylinux_2_28-vulkan.tar.gz` 형식)을 다운로드합니다.
+```bash
+# 최신 Vulkan 바이너리 다운로드 및 압축 해제 예시
+wget https://github.com/TabbyML/tabby/releases/download/v0.15.1/tabby_x86_64-manylinux_2_28-vulkan.tar.gz
+tar -xvf tabby_x86_64-manylinux_2_28-vulkan.tar.gz
+
+# 실행 권한 부여 후 시스템 경로로 이동
+chmod +x tabby
+sudo mv tabby /usr/local/bin/
+```
+
+**2. 컨텍스트 검색 도구 (선택 사항)**
+Tabby가 문서 파싱 등을 위해 사용하는 크롤러 백엔드인 `katana`가 필요하다면 함께 설치해 줍니다.
+```bash
+sudo pacman -S katana-bin
+```
+
+---
+
+### 3. Vulkan 모드로 실행하기
+설치가 완료되었다면 서비스를 시작할 때 `--device vulkan` 플래그를 제공하여 Vulkan 가속을 활성화합니다.
+
+```bash
+tabby serve --model StarCoder-1B --chat-model Qwen2-1.5B-Instruct --device vulkan
+```
+
+*   **정상 작동 확인:** 웹 브라우저에서 `http://localhost:8080`에 접속하여 API 대시보드가 열리는지 확인합니다.
